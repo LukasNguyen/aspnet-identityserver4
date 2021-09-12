@@ -27,7 +27,8 @@ namespace Movies.Client.ApiServices
         {
             var httpClient = httpClientFactory.CreateClient("MovieAPIClient");
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies/");
+            //var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies/");
+            var request = new HttpRequestMessage(HttpMethod.Get, "/movies"); // use upstream path
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
