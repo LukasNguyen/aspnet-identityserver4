@@ -12,21 +12,48 @@ namespace IdentityServer
         public static IEnumerable<Client> Clients =>
             new Client[]
             {
+                // Use authentication flow
+                //new Client
+                //{
+                //    ClientId = "movieClient", // client id must be a unique ID
+                //    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                //    ClientSecrets =
+                //    {
+                //        new Secret("secret".Sha256())
+                //    },
+                //    AllowedScopes = { "movieAPI" }
+                //},
+                // new Client
+                //{
+                //    ClientId = "movies_mvc_client", // client id must be a unique ID
+                //    ClientName = "Movies MVC Web App", // like a description
+                //    AllowedGrantTypes = GrantTypes.Code,
+                //    AllowRememberConsent = false,
+                //    RedirectUris = new List<string>()
+                //    {
+                //        "https://localhost:5002/signin-oidc"
+                //    },
+                //    PostLogoutRedirectUris = new List<string>()
+                //    {
+                //        "https://localhost:5002/signout-callback-oidc"
+                //    },
+                //    ClientSecrets =
+                //    {
+                //        new Secret("secret".Sha256())
+                //    },
+                //    AllowedScopes = new List<string>
+                //    {
+                //        IdentityServerConstants.StandardScopes.OpenId,
+                //        IdentityServerConstants.StandardScopes.Profile
+                //    }
+
+                //Use Hybrid flow
                 new Client
-                {
-                    ClientId = "movieClient", // client id must be a unique ID
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-                    AllowedScopes = { "movieAPI" }
-                },
-                 new Client
                 {
                     ClientId = "movies_mvc_client", // client id must be a unique ID
                     ClientName = "Movies MVC Web App", // like a description
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.Hybrid,
+                    RequirePkce = false,
                     AllowRememberConsent = false,
                     RedirectUris = new List<string>()
                     {
@@ -43,7 +70,11 @@ namespace IdentityServer
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "movieAPI",
+                        "roles"
                     }
                 }
             };
@@ -63,7 +94,10 @@ namespace IdentityServer
             new IdentityResource[]
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile()
+                new IdentityResources.Profile(),
+                new IdentityResources.Address(),
+                new IdentityResources.Email(),
+                new IdentityResource("roles", "Your role(s)", new List<string>{ "role"})
             };
 
         public static List<TestUser> TestUsers =>

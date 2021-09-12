@@ -1,4 +1,5 @@
-﻿using IdentityModel.Client;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices;
 using Movies.Client.HttpHandlers;
@@ -34,21 +36,43 @@ namespace Movies.Client
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                //options.AccessDeniedPath = "/Account/AccessDenied";
+            })
             .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
                 options.Authority = "https://localhost:5005";
+                options.AccessDeniedPath = "/Account/AccessDenied";
 
                 options.ClientId = "movies_mvc_client";
                 options.ClientSecret = "secret";
-                options.ResponseType = "code";
+                //options.ResponseType = "code"; // use authentication flow
+                options.ResponseType = "code id_token"; // use hybrid flow
 
+                // openid and profile is not mandatory, automatically add by libraries.
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
+
+                options.Scope.Add("movieAPI"); // Add this scope when using hybrid flow
+
+                options.Scope.Add("address");
+                options.Scope.Add("email");
+                options.Scope.Add("roles");
+
+                options.ClaimActions.MapUniqueJsonKey(claimType: "role", jsonKey: "role");
+                options.ClaimActions.MapUniqueJsonKey(claimType: "address", jsonKey: "address");
 
                 options.SaveTokens = true; // Store the token after successful authorization
 
                 options.GetClaimsFromUserInfoEndpoint = true;
+
+                // Requires token should have given name and role claims
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = JwtClaimTypes.GivenName,
+                    RoleClaimType = JwtClaimTypes.Role
+                };
             });
 
             // 1 create an HttpClient used for accessing the Movie.API
@@ -69,13 +93,15 @@ namespace Movies.Client
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
 
-            services.AddSingleton(new ClientCredentialsTokenRequest
-            {
-                Address = "https://localhost:5005/connect/token",
-                ClientId = "movieClient",
-                ClientSecret = "secret",
-                Scope = "movieAPI"
-            });
+            services.AddHttpContextAccessor();
+
+            //services.AddSingleton(new ClientCredentialsTokenRequest
+            //{
+            //    Address = "https://localhost:5005/connect/token",
+            //    ClientId = "movieClient",
+            //    ClientSecret = "secret",
+            //    Scope = "movieAPI"
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

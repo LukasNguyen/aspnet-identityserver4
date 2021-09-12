@@ -1,8 +1,12 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -11,10 +15,12 @@ namespace Movies.Client.ApiServices
     public class MovieApiService : IMovieApiService
     {
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public MovieApiService(IHttpClientFactory httpClientFactory)
+        public MovieApiService(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
         {
             this.httpClientFactory = httpClientFactory;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<IEnumerable<Movie>> GetMovies()
@@ -77,6 +83,36 @@ namespace Movies.Client.ApiServices
 
             //// Deserialize Object to MovieList
             //return JsonConvert.DeserializeObject<List<Movie>>(content);
+        }
+
+        public async Task<UserInfoViewModel> GetUserInfo()
+        {
+            var idpClient = httpClientFactory.CreateClient("IDPClient");
+
+            var metadataResponse = await idpClient.GetDiscoveryDocumentAsync();
+
+            if (metadataResponse.IsError)
+            {
+                throw new HttpRequestException("Something went wrong while requesting the access token");
+            }
+
+            var accessToken = await httpContextAccessor
+                .HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
+
+            var userInfoResponse = await idpClient.GetUserInfoAsync(new UserInfoRequest
+            {
+                Address = metadataResponse.UserInfoEndpoint,
+                Token = accessToken
+            });
+
+            var userInfoDictionary = new Dictionary<string, string>();
+
+            foreach(var claim in userInfoResponse.Claims)
+            {
+                userInfoDictionary.Add(claim.Type, claim.Value);
+            }
+
+            return new UserInfoViewModel(userInfoDictionary);
         }
 
         public Task<Movie> CreateMovie(Movie movie)

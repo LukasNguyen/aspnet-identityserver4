@@ -28,7 +28,14 @@ namespace Movies.Client.Controllers
             return View(await movieApiService.GetMovies());
         }
 
-        public async Task LogTokenAndClaims()
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> OnlyAdmin()
+        {
+            var userInfo = await movieApiService.GetUserInfo();
+            return View(userInfo);
+        }
+
+        private async Task LogTokenAndClaims()
         {
             var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
 
@@ -38,12 +45,6 @@ namespace Movies.Client.Controllers
             {
                 Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
             }
-        }
-
-        public async Task Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); //  performs the sign out from the cookie authenticated operation from your browser
-            await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme); // perform the sign out from the OpenID Connect authentication from IdentityServer4
         }
 
         // GET: Movies/Details/5

@@ -53,7 +53,7 @@ namespace Movies.API
                 options.AddPolicy("ClientIdPolicy", policy =>
                 {
                     // Requires claim of client id whose value is movieClient
-                    policy.RequireClaim("client_id", "movieClient");
+                    policy.RequireClaim("client_id", "movieClient", "movies_mvc_client");
                 });
             });
         }
