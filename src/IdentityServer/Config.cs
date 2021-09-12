@@ -13,16 +13,17 @@ namespace IdentityServer
             new Client[]
             {
                 // Use authentication flow
-                //new Client
-                //{
-                //    ClientId = "movieClient", // client id must be a unique ID
-                //    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                //    ClientSecrets =
-                //    {
-                //        new Secret("secret".Sha256())
-                //    },
-                //    AllowedScopes = { "movieAPI" }
-                //},
+                new Client
+                {
+                    ClientId = "movieClient", // client id must be a unique ID
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+                    AllowedScopes = { "movieAPI" },
+                    AllowedCorsOrigins = {"https://localhost:5001"}
+                },
                 // new Client
                 //{
                 //    ClientId = "movies_mvc_client", // client id must be a unique ID
@@ -78,6 +79,7 @@ namespace IdentityServer
                     }
                 }
             };
+
 
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
