@@ -6,7 +6,7 @@ namespace Movies.Client.ApiServices
 {
     public interface IMovieApiService
     {
-        Task<IEnumerable<Movie>> GetMovies();
+        Task<IEnumerable<Movie>> GetMovies(string userName);
 
         Task<Movie> GetMovie(string id);
 

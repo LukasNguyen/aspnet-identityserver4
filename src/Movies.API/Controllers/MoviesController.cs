@@ -25,9 +25,12 @@ namespace Movies.API.Controllers
 
         // GET: api/Movies
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie()
+        public async Task<ActionResult<IEnumerable<Movie>>> GetMovie(string userName)
         {
-            return Ok(await _context.Movie.ToListAsync());
+            return Ok(await _context.Movie
+                .Where(x =>
+                    string.Equals(x.Owner, userName, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync());
         }
 
         // GET: api/Movies/5

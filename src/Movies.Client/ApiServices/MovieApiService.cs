@@ -23,12 +23,12 @@ namespace Movies.Client.ApiServices
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IEnumerable<Movie>> GetMovies()
+        public async Task<IEnumerable<Movie>> GetMovies(string userName)
         {
             var httpClient = httpClientFactory.CreateClient("MovieAPIClient");
 
             //var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies/");
-            var request = new HttpRequestMessage(HttpMethod.Get, "/movies"); // use upstream path
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/movies?userName={userName}"); // use upstream path
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.ApiServices;
 using Movies.Client.Models;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Movies.Client.Controllers
@@ -25,7 +26,9 @@ namespace Movies.Client.Controllers
         public async Task<IActionResult> Index()
         {
             await LogTokenAndClaims();
-            return View(await movieApiService.GetMovies());
+
+            var userName = User.Claims.FirstOrDefault(x => x.Type == "given_name").Value;
+            return View(await movieApiService.GetMovies(userName));
         }
 
         [Authorize(Roles = "admin")]
